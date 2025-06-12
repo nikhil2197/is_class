@@ -45,7 +45,7 @@ python main.py path/to/video.mov
 ```
 This creates `<video_basename>_output/` next to your video, containing:
 - `frames/` (extracted images)
-- `analysis/` (per-frame JSON results)
+- `analysis/` (per-frame JSON results, with optional reflection responses)
 - `final.txt` (overall decision + confidence + summary)
 
 ### Standalone modules

@@ -51,12 +51,29 @@ def analyze_frames(frame_paths: List[str], analysis_dir: str, config: Dict) -> L
             {"role": "user", "content": f"Here is a base64-encoded image:\n{b64}"}
         ]
         logging.info("Analyzing frame %d/%d: %s", idx + 1, len(frame_paths), frame_path)
+        # Initial analysis call
         resp = _client.chat.completions.create(model=model, messages=messages)
-        # Throttle requests if configured
+        # Optionally throttle between calls
         if delay and idx < len(frame_paths) - 1:
             logging.debug("Sleeping for %s seconds to throttle API calls", delay)
             time.sleep(delay)
-        content = resp.choices[0].message.content.strip()
+        initial_reply = resp.choices[0].message.content.strip()
+        # Reflection step: ask model to verify its answer
+        reflection_prompt = config.get("prompts", {}).get("reflection")
+        if reflection_prompt:
+            logging.info("Reflecting on frame %d/%d", idx + 1, len(frame_paths))
+            # Build messages for reflection
+            reflect_msgs = messages + [
+                {"role": "assistant", "content": initial_reply},
+                {"role": "user", "content": reflection_prompt}
+            ]
+            resp2 = _client.chat.completions.create(model=model, messages=reflect_msgs)
+            # Throttle after reflection if needed
+            if delay and idx < len(frame_paths) - 1:
+                time.sleep(delay)
+            content = resp2.choices[0].message.content.strip()
+        else:
+            content = initial_reply
         label, confidence = _parse_label_confidence(content)
         timestamp = idx * interval
         result = {
