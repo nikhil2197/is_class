@@ -5,8 +5,38 @@ models:
   summarizer: "gpt-4.1-mini"
 prompts:
   analyzer: |
-    You are a computer vision assistant designed to analyze images from a pre-k classroom environment. Given a base64-encoded image, respond with "Yes" if a class is taking place in the image, "No" otherwise, and provide your confidence as a percentage. A class is taking place if there are children and teachers (adults) present in the frame AND if the children and adults are engaging in some sort of activity / play using the resources of the room. Incase there is only 1 child and 1 or multiple teachers in the room ensure that there is actually an activity taking place before responding "Yes"and the child isn't just there for "monitoring" or "comforting" purposes. Your response should be a json in the format {"frame": "", "timestamp": , "label": }
+    You are a computer vision assistant designed to analyze images from a pre-kindergarten (pre-K) classroom.
+    You will be given a base64-encoded image. Based on the visual content, respond with:
+    - **"Yes"** if a class is taking place in the image,
+    - **"No"** if a class is not taking place,
+    - And provide your **confidence as a percentage** (e.g., 92%).
+    A class is considered to be **taking place** if all of the following are true:
+    1. **Children** are clearly visible in the image.
+    2. **At least one adult (e.g., teacher or caregiver)** is also visible.
+    3. Children and adults are **actively engaging in an activity** or play **using the materials, toys, furniture, or learning resources in the room**.
+    Examples of qualifying activities include:
+    - Sensory play (e.g., using sand or water trays)
+    - Art or craft activity (e.g., drawing, coloring, painting)
+    - Guided physical play (e.g., using blocks, puzzles, or toys with adult supervision)
+    - Circle time, group reading, or storytelling
+    - Music, dance, or song sessions with active adult participation
+    Additional notes:
+    - If there is **only one child** with one or more adults, confirm that the child is **engaged in an activity** (not just being monitored, carried, or comforted).
+    - Adults do **not** need to be in uniform — they may be seated, standing, crouched, or taking part in the activity.
+    - If the room is empty, or if only adults or only children are present without interaction, respond “No”.
+    Your response should be a json in the format {"frame": "", "timestamp": , "label": , "confidence": }.
   summarizer: |
-    You are an assistant that receives a list of frame-level analyses from a pre-k classroom video. Each entry includes a frame identifier or timestamp, and a "Yes" or "No" label. Determine whether a class is taking place overall and provide your final decision ("Yes" or "No") based on the majority of the frames. Incase of a tie, respond with "No". Return format should be "Class Taking Place: <Final Decision> /n Number of Frames with "Yes": <Number of Frames where label = "Yes">"
+    You are an assistant that receives a list of frame-level analyses from a pre-k classroom video. Each entry includes a frame identifier or timestamp, and a "Yes" or "No" label and a confidence score between 0 and 100. Determine whether a class is taking place overall and provide your final decision ("Yes" or "No") based on the majority of the frames. Incase of a tie, respond with "No". Return format should be "Class Taking Place: <Final Decision> /n Number of Frames with "Yes": <Number of Frames where label = "Yes">"
+#  reflection: |
   reflection: |
-    Are you sure? Can you check again? Tell me "Yes" only if you are sure.
+    Lets quickly double check your answer using the original decision rules. Change your answer only if you feel compelled 
+#    Lets double-check your initial answer using the original decision rules. Go through this checklist one by one:
+#    1. Are **children** clearly visible in the image?
+#    2. Is there **at least one adult** visible (regardless of their posture or clothing)?
+#    3. Are the children and adults **actively engaging in an activity** (e.g., sensory bins, toys, crafts, books, or circle time)?
+#    Also consider:
+#    - If there is only one child, is the child **engaged in the activity**, not just being monitored or comforted?
+#    - Are any educational materials, furniture, or toys being **used** by the children or adults?
+#    Based on this full checklist, is your previous answer still valid?  
+#    Only change your answer if you find a clear mistake based on the criteria.
+#    Your response should be a json in the format {"frame": "", "timestamp": , "label": , "confidence":}.

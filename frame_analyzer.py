@@ -57,9 +57,12 @@ def analyze_frames(frame_paths: List[str], analysis_dir: str, config: Dict) -> L
         if delay and idx < len(frame_paths) - 1:
             logging.debug("Sleeping for %s seconds to throttle API calls", delay)
             time.sleep(delay)
+        # Save initial reply and parse
         initial_reply = resp.choices[0].message.content.strip()
+        initial_label, initial_confidence = _parse_label_confidence(initial_reply)
         # Reflection step: ask model to verify its answer
         reflection_prompt = config.get("prompts", {}).get("reflection")
+        final_content = initial_reply
         if reflection_prompt:
             logging.info("Reflecting on frame %d/%d", idx + 1, len(frame_paths))
             # Build messages for reflection
@@ -71,10 +74,11 @@ def analyze_frames(frame_paths: List[str], analysis_dir: str, config: Dict) -> L
             # Throttle after reflection if needed
             if delay and idx < len(frame_paths) - 1:
                 time.sleep(delay)
-            content = resp2.choices[0].message.content.strip()
-        else:
-            content = initial_reply
-        label, confidence = _parse_label_confidence(content)
+            final_content = resp2.choices[0].message.content.strip()
+        # Parse final content, but fallback to initial if no confidence given
+        label, confidence = _parse_label_confidence(final_content)
+        if confidence == 0.0 and initial_confidence > 0.0:
+            label, confidence = initial_label, initial_confidence
         timestamp = idx * interval
         result = {
             "frame": os.path.basename(frame_path),
