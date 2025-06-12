@@ -3,7 +3,10 @@ import os
 import re
 import json
 import base64
+import io
+from PIL import Image
 import logging
+import time
 from typing import List, Dict
 
 from openai import OpenAI
@@ -25,18 +28,34 @@ def analyze_frames(frame_paths: List[str], analysis_dir: str, config: Dict) -> L
     model = config["models"]["analyzer"]
     prompt = config["prompts"]["analyzer"]
     interval = config["frame_interval"]
+    # Delay between API calls (seconds)
+    delay = config.get("request_delay", 0)
 
     results = []
     for idx, frame_path in enumerate(frame_paths):
-        with open(frame_path, "rb") as f:
-            data = f.read()
-        b64 = base64.b64encode(data).decode("utf-8")
+        # Downscale image to reduce token size
+        try:
+            with Image.open(frame_path) as img:
+                img = img.convert("RGB")
+                img = img.resize((256, 256))
+                buf = io.BytesIO()
+                img.save(buf, format="JPEG", quality=30)
+                b64data = buf.getvalue()
+        except Exception:
+            # Fallback to raw bytes
+            with open(frame_path, "rb") as f:
+                b64data = f.read()
+        b64 = base64.b64encode(b64data).decode("utf-8")
         messages = [
             {"role": "system", "content": prompt},
             {"role": "user", "content": f"Here is a base64-encoded image:\n{b64}"}
         ]
         logging.info("Analyzing frame %d/%d: %s", idx + 1, len(frame_paths), frame_path)
         resp = _client.chat.completions.create(model=model, messages=messages)
+        # Throttle requests if configured
+        if delay and idx < len(frame_paths) - 1:
+            logging.debug("Sleeping for %s seconds to throttle API calls", delay)
+            time.sleep(delay)
         content = resp.choices[0].message.content.strip()
         label, confidence = _parse_label_confidence(content)
         timestamp = idx * interval

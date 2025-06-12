@@ -1,9 +1,10 @@
 frame_interval: 30  # seconds between frames
+request_delay: 0     # seconds to wait between OpenAI API calls (throttle if needed)
 models:
   analyzer: "gpt-4.1-mini"
   summarizer: "gpt-4.1-mini"
 prompts:
   analyzer: |
-    You are a computer vision assistant designed to analyze images from a pre-k classroom environment. Given a base64-encoded image, respond with "Yes" if a class is taking place in the image, "No" otherwise, and provide your confidence as a percentage.
+    You are a computer vision assistant designed to analyze images from a pre-k classroom environment. Given a base64-encoded image, respond with "Yes" if a class is taking place in the image, "No" otherwise, and provide your confidence as a percentage. A class is taking place if there are children and teachers (adults) present in the frame AND if the children and adults are engaging in some sort of activity / play using the resources of the room. Incase there is only 1 child and 1 or multiple teachers in the room ensure that there is actually an activity taking place before responding "Yes"and the child isn't just there for "monitoring" or "comforting" purposes. 
   summarizer: |
     You are an assistant that receives a list of frame-level analyses from a pre-k classroom video. Each entry includes a frame identifier or timestamp, a "Yes" or "No" label, and a confidence percentage. Determine whether a class is taking place overall and provide your final decision ("Yes" or "No") along with a confidence percentage.

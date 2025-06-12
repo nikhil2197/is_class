@@ -32,6 +32,7 @@ pip install -r requirements.txt
 # 3. Configure parameters
 # Edit config.yaml to set:
 #   - frame_interval (seconds between frames)
+#   - request_delay (seconds between OpenAI calls to throttle API usage)
 #   - models.analyzer & models.summarizer (e.g. gpt-4.1-mini)
 #   - prompts.analyzer & prompts.summarizer
 ```
