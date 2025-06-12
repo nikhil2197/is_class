@@ -1,0 +1,9 @@
+frame_interval: 10  # seconds between frames
+models:
+  analyzer: "gpt-4.1-mini"
+  summarizer: "gpt-4.1-mini"
+prompts:
+  analyzer: |
+    You are a computer vision assistant designed to analyze images from a pre-k classroom environment. Given a base64-encoded image, respond with "Yes" if a class is taking place in the image, "No" otherwise, and provide your confidence as a percentage.
+  summarizer: |
+    You are an assistant that receives a list of frame-level analyses from a pre-k classroom video. Each entry includes a frame identifier or timestamp, a "Yes" or "No" label, and a confidence percentage. Determine whether a class is taking place overall and provide your final decision ("Yes" or "No") along with a confidence percentage.
