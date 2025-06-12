@@ -4,8 +4,11 @@ import logging
 import json
 from typing import List, Dict
 
-import openai
 import tiktoken
+from openai import OpenAI
+
+# Initialize OpenAI client
+_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def summarize_frames(results: List[Dict], config: Dict) -> Dict:
@@ -81,7 +84,7 @@ def _summarize_chunk(items: List[str], prompt: str, model: str) -> str:
         {"role": "system", "content": prompt},
         {"role": "user", "content": content}
     ]
-    resp = openai.ChatCompletion.create(model=model, messages=messages)
+    resp = _client.chat.completions.create(model=model, messages=messages)
     return resp.choices[0].message.content.strip()
 
 

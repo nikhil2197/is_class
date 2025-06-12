@@ -1,4 +1,4 @@
-frame_interval: 10  # seconds between frames
+frame_interval: 30  # seconds between frames
 models:
   analyzer: "gpt-4.1-mini"
   summarizer: "gpt-4.1-mini"

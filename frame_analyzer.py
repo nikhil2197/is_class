@@ -6,7 +6,10 @@ import base64
 import logging
 from typing import List, Dict
 
-import openai
+from openai import OpenAI
+
+# Initialize OpenAI client
+_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def analyze_frames(frame_paths: List[str], analysis_dir: str, config: Dict) -> List[Dict]:
@@ -33,7 +36,7 @@ def analyze_frames(frame_paths: List[str], analysis_dir: str, config: Dict) -> L
             {"role": "user", "content": f"Here is a base64-encoded image:\n{b64}"}
         ]
         logging.info("Analyzing frame %d/%d: %s", idx + 1, len(frame_paths), frame_path)
-        resp = openai.ChatCompletion.create(model=model, messages=messages)
+        resp = _client.chat.completions.create(model=model, messages=messages)
         content = resp.choices[0].message.content.strip()
         label, confidence = _parse_label_confidence(content)
         timestamp = idx * interval
