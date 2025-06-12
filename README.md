@@ -13,6 +13,7 @@ This Python pipeline processes a `.mov` video to determine whether a class is ta
   - `frame_analyzer.py`
   - `summarizer.py`
 - Automatic token-based chunking to respect model context limits
+- Optional "reflection" step: the model is asked to verify its per-frame answer if configured
 
 ## Requirements
 - Python 3.8+
@@ -34,7 +35,7 @@ pip install -r requirements.txt
 #   - frame_interval (seconds between frames)
 #   - request_delay (seconds between OpenAI calls to throttle API usage)
 #   - models.analyzer & models.summarizer (e.g. gpt-4.1-mini)
-#   - prompts.analyzer & prompts.summarizer
+#   - prompts.analyzer, prompts.summarizer & prompts.reflection
 ```
 
 ## Usage
